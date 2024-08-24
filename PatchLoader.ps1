@@ -6,7 +6,7 @@ enum _Coh2State {
 }
 
 $PATCHURL = "https://raw.githubusercontent.com/kotanys/Coh2LanguagePatch/main/_patch.ps1"
-$PATH = "."
+$PATH = "C:\Program Files (x86)\Steam\steamapps\common\Company of Heroes 2"
 
 function _DownloadPatch([string]$coh2exe) {
     try 
@@ -47,11 +47,11 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
     {
         Write-Output "—качиваю патч с $PATCHURL"
         $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
-        if ($null -ne $patch)
+        if ($null -eq $patch)
         {
             throw
         }
-        $ps1 = ".\sgvqw0rwev_coh2patch.ps1"
+        $ps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
         $patch | Out-File $ps1
         Write-Output "ѕатч (.ps1) сохранЄн в $ps1"
     }
