@@ -1,4 +1,4 @@
-$COH2PATH = {0}
+$COH2PATH = "{0}"
 $langs = Get-WinUserLanguageList
 if ($langs[0].LanguageTag -eq "en-US")
 {

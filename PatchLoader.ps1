@@ -9,8 +9,26 @@ $PATCHURL = "https://raw.githubusercontent.com/kotanys/Coh2LanguagePatch/main/_p
 $PATH = "."
 
 function _DownloadPatch([string]$coh2exe) {
-    $responce = Invoke-WebRequest -Uri $PATCHURL -Headers @{"Cache-Control"="no-cache"}
-    return $responce.Content.Replace("{0}", "`"" + $coh2exe + "`"")
+    try 
+    {
+        $responce = Invoke-WebRequest -Uri $PATCHURL -Headers @{"Cache-Control"="no-cache"}
+    }
+    catch [System.InvalidOperationException]
+    {
+        Write-Error "Не вышло получить файл."
+        return $null
+    }
+    catch
+    {
+        Write-Error "Неожиданная ошибка скачивания."
+        return $null
+    }
+    if ($responce.StatusCode -ne 200)
+    {
+        Write-Error "Не вышло получить файл."
+        return $null
+    }
+    return $responce.Content.Replace("{0}", $coh2exe)
 }
 function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
     $found = $false
@@ -39,6 +57,10 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
     {
         Write-Output "Скачиваю патч с $PATCHURL"
         $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
+        if ($null -ne $patch)
+        {
+            throw
+        }
         $ps1 = ".\sgvqw0rwev_coh2patch.ps1"
         $patch | Out-File $ps1
         Write-Output "Патч (.ps1) сохранён в $ps1"
