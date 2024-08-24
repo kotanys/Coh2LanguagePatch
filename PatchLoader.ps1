@@ -4,6 +4,14 @@ enum _Coh2State {
     Patched
     No
 }
+
+$PATCHURL = "https://raw.githubusercontent.com/kotanys/Coh2LanguagePatch/main/_patch.ps1"
+$PATH = "."
+
+function _DownloadPatch([string]$coh2exe) {
+    $responce = Invoke-WebRequest -Uri $PATCHURL -Headers @{"Cache-Control"="no-cache"}
+    return $responce.Content.Replace("{0}", "`"" + $coh2exe + "`"")
+}
 function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
     $found = $false
     $files = Get-ChildItem -File -Path $path
@@ -22,50 +30,35 @@ function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
 function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
                       [Parameter(Mandatory)] [string]$outfile) {
 
-    $tempps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
-
-    "`$COH2PATH = `"$coh2exe`"" > $tempps1
-    "`$langs = Get-WinUserLanguageList" >> $tempps1
-    "if (`$langs[0].LanguageTag -eq `"en-US`")" >> $tempps1
-    "{" >> $tempps1
-    "    [System.Diagnostics.Process]::Start(`$COH2PATH) | Out-Null" >> $tempps1
-    "    return" >> $tempps1
-    "}" >> $tempps1
-    "`$langs.Reverse()" >> $tempps1
-    "Set-WinUserLanguageList -LanguageList `$langs -Force | Out-Null" >> $tempps1
-    "try" >> $tempps1
-    "{" >> $tempps1
-    "    [System.Diagnostics.Process]::Start(`$COH2PATH) | Out-Null" >> $tempps1
-    "    Write-Output `"Waiting 20 seconds`"" >> $tempps1
-    "    Start-Sleep -Seconds 20" >> $tempps1
-    "}" >> $tempps1
-    "finally" >> $tempps1
-    "{" >> $tempps1
-    "    `$langs.Reverse()" >> $tempps1
-    "    Set-WinUserLanguageList -LanguageList `$langs -Force | Out-Null" >> $tempps1
-    "}" >> $tempps1
-
-    Invoke-ps2exe -inputFile $tempps1 -outputFile $outfile -Verbose
+    if (Test-Path -Path "$PATH\_patch.ps1")
+    {
+        Write-Output "Найден патч в текущей папке."
+        $ps1 = "$PATH\_patch.ps1"
+    }
+    else
+    {
+        Write-Output "Скачиваю патч с $PATCHURL"
+        $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
+        $ps1 = ".\sgvqw0rwev_coh2patch.ps1"
+        $patch | Out-File $ps1
+        Write-Output "Патч (.ps1) сохранён в $ps1"
+    }
+    Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose
 }
 
-$PATH = "."
-$iscoh2patchresult = _GetCoh2State $PATH
-if ($iscoh2patchresult -eq ([_Coh2State]::No))
+$coh2state = _GetCoh2State $PATH
+if ($coh2state -eq ([_Coh2State]::No))
 {
     Write-Error "Нет коха!"
     return
 }
-elseif ($iscoh2patchresult -eq ([_Coh2State]::Patched)) {
+elseif ($coh2state -eq ([_Coh2State]::Patched)) {
     Write-Output "Удаляю прошлый патч"
     try {
         Remove-Item -Path "$PATH\reliccoh2.exe"
         Rename-Item -Path "$PATH\__reliccoh2.exe" -NewName "RelicCoH2.exe"
     }
-    catch {
-        Write-Error "Не вышло :("
-        throw
-        return
-    }
+    catch { }
 }
 
 try {
@@ -79,7 +72,7 @@ try
 {
     Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
     _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
-    Write-Output "Готово. Оригинальный кох переименован в __RelicCoH2.exe. Для удаления патча достаточно удалить RelicCoH2.exe и переименовать __RelicCoH2.exe в RelicCoH2.exe"
+    Write-Output "Патч установлен. Оригинальный exe коха переименован в __RelicCoH2.exe"
 }
 catch
 {
