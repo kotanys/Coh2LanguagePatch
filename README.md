@@ -14,11 +14,11 @@
 
 Повторный запуск PatchLoader.ps1 переустановит патч.
 
-После выполнения скрипта можно для безопасности снова запретить выполнение скриптов командой `Set-ExecutionPolicy -Scope CurrentUser Restricted`.
+После выполнения скрипта можно для безопасности снова запретить выполнение скриптов командой `Set-ExecutionPolicy Restricted -Scope CurrentUser`.
 
 ## 2 способ (ручной)
 1. Скачайте [_patch.ps1](https://github.com/kotanys/Coh2LanguagePatch/blob/main/_patch.ps1)
-2. Установите модуль Ps2exe командой `Install-Module Ps2exe`
+2. Установите модуль Ps2exe командой `Install-Module Ps2exe -Scope CurrentUser`
 3. Переименуйте исполняемый файл RelicCoH2.exe в любое другое имя, например - __RelicCoH2.exe
 4. Откройте _patch.ps1 любым редактором и замените `{0}` в первой строке новым названием исполняемого файла CoH
 5. Скомпилируйте _patch.ps1 в .exe - это делается командой `Invoke-ps2exe -inputFile _patch.ps1 -outputFile RelicCoH2.exe -Verbose -noConsole`
