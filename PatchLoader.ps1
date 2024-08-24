@@ -31,19 +31,9 @@ function _DownloadPatch([string]$coh2exe) {
     return $responce.Content.Replace("{0}", $coh2exe)
 }
 function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
-    $found = $false
-    $files = Get-ChildItem -File -Path $path
-    foreach ($file in $files) {
-        if ($file.Name.ToLower().Equals("__reliccoh2.exe"))
-        {
-            return [_Coh2State]::Patched
-        }
-        if ($file.Name.ToLower().Equals("reliccoh2.exe"))
-        {
-            $found = $true
-        }
-    }
-    return $(if ($found) { [_Coh2State]::Yes } else { [_Coh2State]::No })
+    return $(if (Test-Path -Path "$path\__reliccoh2") { [_Coh2State]::Patched }
+            elseif (Test-Path -Path "$path\reliccoh2") { [_Coh2State]::Yes }
+            else { [_Coh2State]::No })
 }
 function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
                       [Parameter(Mandatory)] [string]$outfile) {
