@@ -31,8 +31,8 @@ function _DownloadPatch([string]$coh2exe) {
     return $responce.Content.Replace("{0}", $coh2exe)
 }
 function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
-    return $(if (Test-Path -Path "$path\__reliccoh2") { [_Coh2State]::Patched }
-            elseif (Test-Path -Path "$path\reliccoh2") { [_Coh2State]::Yes }
+    return $(if (Test-Path -Path "$path\__reliccoh2.exe") { [_Coh2State]::Patched }
+            elseif (Test-Path -Path "$path\reliccoh2.exe") { [_Coh2State]::Yes }
             else { [_Coh2State]::No })
 }
 function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
@@ -55,7 +55,7 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
         $patch | Out-File $ps1
         Write-Output "Патч (.ps1) сохранён в $ps1"
     }
-    Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose
+    Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose -noConsole
 }
 
 $coh2state = _GetCoh2State $PATH

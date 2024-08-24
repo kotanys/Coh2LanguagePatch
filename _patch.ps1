@@ -6,7 +6,7 @@ if ($langs[0].LanguageTag -eq "en-US")
     return
 }
 $langs.Reverse()
-Set-WinUserLanguageList -LanguageList $langs -Force | Out-Null
+Set-WinUserLanguageList -LanguageList $langs -Force 3> $null
 try
 {
     [System.Diagnostics.Process]::Start($COH2PATH) | Out-Null
@@ -15,5 +15,5 @@ try
 finally
 {
     $langs.Reverse()
-    Set-WinUserLanguageList -LanguageList $langs -Force | Out-Null
+    Set-WinUserLanguageList -LanguageList $langs -Force 3> $null
 }
