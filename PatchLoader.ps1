@@ -15,17 +15,17 @@ function _DownloadPatch([string]$coh2exe) {
     }
     catch [System.InvalidOperationException]
     {
-        Write-Error "Íå âûøëî ïîëó÷èòü ôàéë."
+        Write-Error "f"
         return $null
     }
     catch
     {
-        Write-Error "Íåîæèäàííàÿ îøèáêà ñêà÷èâàíèÿ."
+        Write-Error "f"
         return $null
     }
     if ($responce.StatusCode -ne 200)
     {
-        Write-Error "Íå âûøëî ïîëó÷èòü ôàéë."
+        Write-Error "f"
         return $null
     }
     return $responce.Content.Replace("{0}", $coh2exe)
@@ -40,12 +40,12 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 
     if (Test-Path -Path "$PATH\_patch.ps1")
     {
-        Write-Output "Íàéäåí ïàò÷ â òåêóùåé ïàïêå."
+        Write-Output "f"
         $ps1 = "$PATH\_patch.ps1"
     }
     else
     {
-        Write-Output "Ñêà÷èâàþ ïàò÷ ñ $PATCHURL"
+        Write-Output "f $PATCHURL"
         $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
         if ($null -eq $patch)
         {
@@ -53,7 +53,7 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
         }
         $ps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
         $patch | Out-File $ps1
-        Write-Output "Ïàò÷ (.ps1) ñîõðàí¸í â $ps1"
+        Write-Output "f $ps1"
     }
     Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose -noConsole
 }
@@ -61,11 +61,12 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 $coh2state = _GetCoh2State $PATH
 if ($coh2state -eq ([_Coh2State]::No))
 {
-    Write-Error "Íåò êîõà!"
+    Write-Error "f"
     return
 }
-elseif ($coh2state -eq ([_Coh2State]::Patched)) {
-    Write-Output "Óäàëÿþ ïðîøëûé ïàò÷"
+elseif ($coh2state -eq ([_Coh2State]::Patched)) 
+{
+    Write-Output "f"
     try {
         Remove-Item -Path "$PATH\reliccoh2.exe"
         Rename-Item -Path "$PATH\__reliccoh2.exe" -NewName "RelicCoH2.exe"
@@ -84,11 +85,11 @@ try
 {
     Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
     _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
-    Write-Output "Ïàò÷ óñòàíîâëåí. Îðèãèíàëüíûé exe êîõà ïåðåèìåíîâàí â __RelicCoH2.exe"
+    Write-Output "f __RelicCoH2.exe"
 }
 catch
 {
-    Write-Error "Îøèáêà!!"
+    Write-Error "f!!"
     throw
     return
 }
