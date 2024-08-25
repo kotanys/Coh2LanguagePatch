@@ -6,7 +6,7 @@ enum _Coh2State {
 }
 
 $PATCHURL = "https://raw.githubusercontent.com/kotanys/Coh2LanguagePatch/main/_patch.ps1"
-$PATH = "C:\Program Files (x86)\Steam\steamapps\common\Company of Heroes 2"
+$PATH = "."
 
 function _DownloadPatch([string]$coh2exe) {
     try 
@@ -15,17 +15,17 @@ function _DownloadPatch([string]$coh2exe) {
     }
     catch [System.InvalidOperationException]
     {
-        Write-Error "Не вышло получить файл."
+        Write-Error "ГЌГҐ ГўГ»ГёГ«Г® ГЇГ®Г«ГіГ·ГЁГІГј ГґГ Г©Г«."
         return $null
     }
     catch
     {
-        Write-Error "Неожиданная ошибка скачивания."
+        Write-Error "ГЌГҐГ®Г¦ГЁГ¤Г Г­Г­Г Гї Г®ГёГЁГЎГЄГ  Г±ГЄГ Г·ГЁГўГ Г­ГЁГї."
         return $null
     }
     if ($responce.StatusCode -ne 200)
     {
-        Write-Error "Не вышло получить файл."
+        Write-Error "ГЌГҐ ГўГ»ГёГ«Г® ГЇГ®Г«ГіГ·ГЁГІГј ГґГ Г©Г«."
         return $null
     }
     return $responce.Content.Replace("{0}", $coh2exe)
@@ -40,12 +40,12 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 
     if (Test-Path -Path "$PATH\_patch.ps1")
     {
-        Write-Output "Найден патч в текущей папке."
+        Write-Output "ГЌГ Г©Г¤ГҐГ­ ГЇГ ГІГ· Гў ГІГҐГЄГіГ№ГҐГ© ГЇГ ГЇГЄГҐ."
         $ps1 = "$PATH\_patch.ps1"
     }
     else
     {
-        Write-Output "Скачиваю патч с $PATCHURL"
+        Write-Output "Г‘ГЄГ Г·ГЁГўГ Гѕ ГЇГ ГІГ· Г± $PATCHURL"
         $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
         if ($null -eq $patch)
         {
@@ -53,7 +53,7 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
         }
         $ps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
         $patch | Out-File $ps1
-        Write-Output "Патч (.ps1) сохранён в $ps1"
+        Write-Output "ГЏГ ГІГ· (.ps1) Г±Г®ГµГ°Г Г­ВёГ­ Гў $ps1"
     }
     Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose -noConsole
 }
@@ -61,11 +61,11 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 $coh2state = _GetCoh2State $PATH
 if ($coh2state -eq ([_Coh2State]::No))
 {
-    Write-Error "Нет коха!"
+    Write-Error "ГЌГҐГІ ГЄГ®ГµГ !"
     return
 }
 elseif ($coh2state -eq ([_Coh2State]::Patched)) {
-    Write-Output "Удаляю прошлый патч"
+    Write-Output "Г“Г¤Г Г«ГїГѕ ГЇГ°Г®ГёГ«Г»Г© ГЇГ ГІГ·"
     try {
         Remove-Item -Path "$PATH\reliccoh2.exe"
         Rename-Item -Path "$PATH\__reliccoh2.exe" -NewName "RelicCoH2.exe"
@@ -84,11 +84,11 @@ try
 {
     Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
     _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
-    Write-Output "Патч установлен. Оригинальный exe коха переименован в __RelicCoH2.exe"
+    Write-Output "ГЏГ ГІГ· ГіГ±ГІГ Г­Г®ГўГ«ГҐГ­. ГЋГ°ГЁГЈГЁГ­Г Г«ГјГ­Г»Г© exe ГЄГ®ГµГ  ГЇГҐГ°ГҐГЁГ¬ГҐГ­Г®ГўГ Г­ Гў __RelicCoH2.exe"
 }
 catch
 {
-    Write-Error "Ошибка!!"
+    Write-Error "ГЋГёГЁГЎГЄГ !!"
     throw
     return
 }
