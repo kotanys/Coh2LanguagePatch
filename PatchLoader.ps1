@@ -60,12 +60,12 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 $coh2state = _GetCoh2State $PATH
 if ($coh2state -eq ([_Coh2State]::No))
 {
-    Write-Error "No COH2"
+    Write-Error "No COH2 found"
     return
 }
 elseif ($coh2state -eq ([_Coh2State]::Patched)) 
 {
-    Write-Output "f"
+    Write-Output "Deleting previous patch"
     try {
         Remove-Item -Path "$PATH\reliccoh2.exe"
         Rename-Item -Path "$PATH\__reliccoh2.exe" -NewName "RelicCoH2.exe"
@@ -84,11 +84,10 @@ try
 {
     Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
     _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
-    Write-Output "f __RelicCoH2.exe"
+    Write-Output "Actual COH2 executable renamed to __RelicCoH2.exe"
 }
 catch
 {
-    Write-Error "f!!"
     throw
     return
 }
