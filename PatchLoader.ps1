@@ -1,4 +1,3 @@
-# FILE MUST BE ENCODED IN WINDOWS-1251 FOR RUSSIAN LANGUAGE OUTPUT
 enum _Coh2State {
     Yes
     Patched
@@ -15,17 +14,17 @@ function _DownloadPatch([string]$coh2exe) {
     }
     catch [System.InvalidOperationException]
     {
-        Write-Error "f"
+        Write-Error "Unable to download $PATCHURL"
         return $null
     }
     catch
     {
-        Write-Error "f"
+        Write-Error "Unknown error downloading"
         return $null
     }
     if ($responce.StatusCode -ne 200)
     {
-        Write-Error "f"
+        Write-Error "Unable to download"
         return $null
     }
     return $responce.Content.Replace("{0}", $coh2exe)
@@ -40,12 +39,12 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 
     if (Test-Path -Path "$PATH\_patch.ps1")
     {
-        Write-Output "f"
+        Write-Output "Using local _patch.ps1"
         $ps1 = "$PATH\_patch.ps1"
     }
     else
     {
-        Write-Output "f $PATCHURL"
+        Write-Output "Downloading from $PATCHURL"
         $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
         if ($null -eq $patch)
         {
@@ -53,7 +52,7 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
         }
         $ps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
         $patch | Out-File $ps1
-        Write-Output "f $ps1"
+        Write-Output "Downloaded to $ps1"
     }
     Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose -noConsole
 }
@@ -61,7 +60,7 @@ function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
 $coh2state = _GetCoh2State $PATH
 if ($coh2state -eq ([_Coh2State]::No))
 {
-    Write-Error "f"
+    Write-Error "No COH2"
     return
 }
 elseif ($coh2state -eq ([_Coh2State]::Patched)) 
