@@ -55,7 +55,7 @@ function _TestCoh2State() {
     }
 }
 function _InstallPatch {
-    try { Get-Command Invoke-PS2EXE }
+    try { Get-Command Invoke-PS2EXE | Out-Null }
     catch
     {
         Install-Module -Name ps2exe -RequiredVersion 1.0.18 -Scope CurrentUser -ErrorAction Stop
