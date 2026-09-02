@@ -1,34 +1,36 @@
+param (
+    [switch]$extract=$false
+)
+
 enum _Coh2State {
     Yes
     Patched
     No
 }
 
-$PATCHURL = "https://raw.githubusercontent.com/kotanys/Coh2LanguagePatch/main/_patch.ps1"
 $PATH = "."
+$PATCH = @'
+    $COH2PATH = "{0}"
+    $langs = Get-WinUserLanguageList
+    if ($langs[0].LanguageTag -eq "en-US")
+    {
+        [System.Diagnostics.Process]::Start($COH2PATH) | Out-Null
+        return
+    }
+    $langs.Reverse()
+    Set-WinUserLanguageList -LanguageList $langs -Force 3> $null
+    try
+    {
+        [System.Diagnostics.Process]::Start($COH2PATH) | Out-Null
+        Start-Sleep -Seconds 20
+    }
+    finally
+    {
+        $langs.Reverse()
+        Set-WinUserLanguageList -LanguageList $langs -Force 3> $null
+    }
+'@
 
-function _DownloadPatch([string]$coh2exe) {
-    try 
-    {
-        $responce = Invoke-WebRequest -Uri $PATCHURL -Headers @{"Cache-Control"="no-cache"}
-    }
-    catch [System.InvalidOperationException]
-    {
-        Write-Error "Unable to download $PATCHURL"
-        return $null
-    }
-    catch
-    {
-        Write-Error "Unknown error downloading"
-        return $null
-    }
-    if ($responce.StatusCode -ne 200)
-    {
-        Write-Error "Unable to download"
-        return $null
-    }
-    return $responce.Content.Replace("{0}", $coh2exe)
-}
 function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
     return $(if (Test-Path -Path "$path\__reliccoh2.exe") { [_Coh2State]::Patched }
             elseif (Test-Path -Path "$path\reliccoh2.exe") { [_Coh2State]::Yes }
@@ -36,25 +38,24 @@ function _GetCoh2State([Parameter(Mandatory)] [string]$path) {
 }
 function _CreatePatch([Parameter(Mandatory)] [string]$coh2exe,
                       [Parameter(Mandatory)] [string]$outfile) {
+    Invoke-ps2exe -InputFile $PATCH.Replace("{0}", $coh2exe) -OutputFile $outfile -Verbose -NoConsole
+}
+function _InstallPatch {
+    if (-not (Get-Command Invoke-PS2EXE -ErrorAction SilentlyContinue))
+    {
+        Install-Module -Name ps2exe -RequiredVersion 1.0.18 -Scope CurrentUser -ErrorAction Stop
+    }
 
-    if (Test-Path -Path "$PATH\_patch.ps1")
-    {
-        Write-Output "Using local _patch.ps1"
-        $ps1 = "$PATH\_patch.ps1"
-    }
-    else
-    {
-        Write-Output "Downloading from $PATCHURL"
-        $patch = _DownloadPatch -url $PATCHURL -coh2exe $coh2exe
-        if ($null -eq $patch)
-        {
-            throw
-        }
-        $ps1 = "$env:TEMP\sgvqw0rwev_coh2patch.ps1"
-        $patch | Out-File $ps1
-        Write-Output "Downloaded to $ps1"
-    }
-    Invoke-ps2exe -inputFile $ps1 -outputFile $outfile -Verbose -noConsole
+    Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
+    _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
+    Write-Output "Actual COH2 executable renamed to __RelicCoH2.exe"
+}
+
+if ($extract)
+{
+    Write-Output "Patch extracted to patch.ps1"
+    Write-Output $PATCH | Out-File patch.ps1
+    return
 }
 
 $coh2state = _GetCoh2State $PATH
@@ -70,24 +71,16 @@ elseif ($coh2state -eq ([_Coh2State]::Patched))
         Remove-Item -Path "$PATH\reliccoh2.exe"
         Rename-Item -Path "$PATH\__reliccoh2.exe" -NewName "RelicCoH2.exe"
     }
-    catch { }
-}
-
-try {
-    Invoke-PS2EXE | Out-Null
-}
-catch {
-    Install-Module -Name ps2exe -Scope CurrentUser
+    catch { 
+        Write-Warning "Couldn't delete patch, proceeding anyway"
+    }
 }
 
 try
 {
-    Rename-Item "$PATH\RelicCoH2.exe" -NewName "__RelicCoH2.exe"
-    _CreatePatch -coh2exe "__RelicCoH2.exe" -outfile "$PATH\RelicCoH2.exe"
-    Write-Output "Actual COH2 executable renamed to __RelicCoH2.exe"
+    _InstallPatch
 }
 catch
 {
     throw
-    return
 }
