@@ -8,9 +8,6 @@ enum _Coh2State {
     No
 }
 
-$PATH = "."
-Set-Location $PATH
-
 $PATCH = @'
     $COH2PATH = "{0}"
     $langs = Get-WinUserLanguageList
@@ -39,7 +36,7 @@ function _GetCoh2State {
             else { [_Coh2State]::No })
 }
 function _TestCoh2State() {
-    $coh2state = _GetCoh2State $PATH
+    $coh2state = _GetCoh2State
     if ($coh2state -eq ([_Coh2State]::No))
     {
         Write-Error "No COH2 found"
@@ -65,7 +62,7 @@ function _InstallPatch {
     }
 
     Rename-Item "RelicCoH2.exe" -NewName "__RelicCoH2.exe"
-    Invoke-ps2exe -InputFile "patch.ps1" -OutputFile "$PATH\RelicCoH2.exe" -Verbose -NoConsole
+    Invoke-ps2exe -InputFile "patch.ps1" -OutputFile "RelicCoH2.exe" -Verbose -NoConsole
     Write-Output "Actual COH2 executable renamed to __RelicCoH2.exe"
 }
 

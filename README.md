@@ -6,7 +6,7 @@
 # Установка
 
 ## 1 способ (автоматический)
-1. Скачайте [PatchLoader.ps1](https://github.com/kotanys/Coh2LanguagePatch/blob/main/PatchLoader.ps1)
+1. Скачайте [PatchLoader.ps1](./PatchLoader.ps1)
 2. Перенесите PatchLoader.ps1 в папку с игрой (туда, где находится RelicCoH2.exe)
    - Папку с игрой можно найти, нажав правой кнопкой по игре в библиотеке Steam
      -> *Управление* -> *Просмотреть локальные файлы*
@@ -22,7 +22,7 @@
 скриптов командой `Set-ExecutionPolicy Restricted -Scope CurrentUser`.
 
 ## 2 способ (ручной)
-1. Скачайте [PatchLoader.ps1](https://github.com/kotanys/Coh2LanguagePatch/blob/main/PatchLoader.ps1)
+1. Скачайте [PatchLoader.ps1](./PatchLoader.ps1)
 2. Выполните `PatchLoader.ps1 -Extract`, чтобы получить патч в файле patch.ps1
 3. Установите модуль Ps2exe командой `Install-Module Ps2exe -Scope CurrentUser`
 4. Переименуйте исполняемый файл RelicCoH2.exe в любое другое имя,
